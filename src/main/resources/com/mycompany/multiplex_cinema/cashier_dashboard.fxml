@@ -7,11 +7,11 @@
 
 <VBox alignment="CENTER" prefHeight="400.0" prefWidth="600.0" spacing="20.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1">
    <children>
-      <Label text="Σύστημα Ταμείου (Cashier)">
+      <Label text="Σύστημα Ταμείου">
          <font>
             <Font name="System Bold" size="24.0" />
          </font>
       </Label>
-      <Label text="Εδώ θα μπει η αναζήτηση προβολών, το πλάνο θέσεων (Grid) και οι κρατήσεις!" />
+      <Label text="Εδώ θα μπει η αναζήτηση προβολών, το πλάνο θέσεων (Grid) και οι κρατήσεις" />
    </children>
 </VBox>
