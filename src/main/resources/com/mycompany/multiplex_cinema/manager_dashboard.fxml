@@ -1,17 +1,123 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.TabPane?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<VBox alignment="CENTER" prefHeight="400.0" prefWidth="600.0" spacing="20.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1">
+<VBox alignment="CENTER" prefHeight="600.0" prefWidth="800.0" spacing="20.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="multiplex.controller.ManagerController">
    <children>
       <Label text="Πίνακας Ελέγχου Διαχειριστή">
          <font>
             <Font name="System Bold" size="24.0" />
          </font>
       </Label>
-      <Label text="Εδώ θα μπουν τα μενού για Ταινίες, Αίθουσες και Αναφορές" />
+
+      <TabPane prefHeight="450.0" prefWidth="760.0" tabClosingPolicy="UNAVAILABLE">
+         <tabs>
+
+            <Tab text="Διαχείριση Ταινιών">
+               <content>
+                  <VBox fx:id="movie" spacing="15.0">
+                     <children>
+                        <HBox prefHeight="400.0" prefWidth="740.0" spacing="15.0">
+                           <children>
+                              <VBox prefWidth="250.0" spacing="10.0" alignment="TOP_LEFT">
+                                 <children>
+                                    <Label text="Τίτλος Ταινίας" />
+                                    <TextField fx:id="titleField" />
+                                    <Label text="Περιγραφή" />
+                                    <TextArea fx:id="descriptionField" prefHeight="80.0" />
+                                    <Label text="Διάρκεια (λεπτά)" />
+                                    <TextField fx:id="durationField" />
+                                    <Label text="Κατηγορία (Genre)" />
+                                    <TextField fx:id="genreField" />
+                                    <HBox spacing="10.0">
+                                       <children>
+                                          <Button mnemonicParsing="false" onAction="#handleAddMovie" text="Προσθήκη" />
+                                          <Button mnemonicParsing="false" onAction="#handleUpdateMovie" text="Ενημέρωση" />
+                                          <Button mnemonicParsing="false" onAction="#handleDeleteMovie" text="Διαγραφή" />
+                                       </children>
+                                       <VBox.margin>
+                                          <Insets top="10.0" />
+                                       </VBox.margin>
+                                    </HBox>
+                                 </children>
+                              </VBox>
+                              <TableView fx:id="movieTable" onMouseClicked="#handleMovieTableClick" prefWidth="450.0" HBox.hgrow="ALWAYS">
+                                 <columns>
+                                    <TableColumn fx:id="colMovieId" text="ID" prefWidth="50.0" />
+                                    <TableColumn fx:id="colMovieTitle" text="Τίτλος" prefWidth="150.0" />
+                                    <TableColumn fx:id="colMovieDuration" text="Διάρκεια" prefWidth="80.0" />
+                                    <TableColumn fx:id="colMovieGenre" text="Κατηγορία" prefWidth="100.0" />
+                                 </columns>
+                              </TableView>
+                           </children>
+                        </HBox>
+                     </children>
+                     <padding>
+                        <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                     </padding>
+                  </VBox>
+               </content>
+            </Tab>
+
+            <Tab text="Διαχείριση Αιθουσών">
+               <content>
+                  <VBox fx:id="hall" spacing="15.0">
+                     <children>
+                        <HBox prefHeight="400.0" prefWidth="740.0" spacing="15.0">
+                           <children>
+                              <VBox prefWidth="250.0" spacing="10.0" alignment="TOP_LEFT">
+                                 <children>
+                                    <Label text="Όνομα Αίθουσας" />
+                                    <TextField fx:id="hallNameField" />
+                                    <Label text="Σειρές Καθισμάτων" />
+                                    <TextField fx:id="rowsField" />
+                                    <Label text="Στήλες Καθισμάτων" />
+                                    <TextField fx:id="colsField" />
+                                    <HBox spacing="10.0">
+                                       <children>
+                                          <Button mnemonicParsing="false" onAction="#handleAddHall" text="Προσθήκη" />
+                                          <Button mnemonicParsing="false" onAction="#handleUpdateHall" text="Ενημέρωση" />
+                                          <Button mnemonicParsing="false" onAction="#handleDeleteHall" text="Διαγραφή" />
+                                       </children>
+                                       <VBox.margin>
+                                          <Insets top="10.0" />
+                                       </VBox.margin>
+                                    </HBox>
+                                 </children>
+                              </VBox>
+                              <TableView fx:id="hallTable" onMouseClicked="#handleHallTableClick" prefWidth="450.0" HBox.hgrow="ALWAYS">
+                                 <columns>
+                                    <TableColumn fx:id="colHallId" text="ID" prefWidth="50.0" />
+                                    <TableColumn fx:id="colHallName" text="Όνομα" prefWidth="150.0" />
+                                    <TableColumn fx:id="colHallRows" text="Σειρές" prefWidth="80.0" />
+                                    <TableColumn fx:id="colHallCols" text="Στήλες" prefWidth="80.0" />
+                                 </columns>
+                              </TableView>
+                           </children>
+                        </HBox>
+                     </children>
+                     <padding>
+                        <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                     </padding>
+                  </VBox>
+               </content>
+            </Tab>
+
+         </tabs>
+      </TabPane>
    </children>
+   <padding>
+      <Insets bottom="15.0" left="15.0" right="15.0" top="15.0" />
+   </padding>
 </VBox>
