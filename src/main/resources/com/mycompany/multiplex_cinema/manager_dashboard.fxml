@@ -2,6 +2,8 @@
 
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.DatePicker?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.Tab?>
 <?import javafx.scene.control.TabPane?>
@@ -102,6 +104,55 @@
                                     <TableColumn fx:id="colHallName" text="Όνομα" prefWidth="150.0" />
                                     <TableColumn fx:id="colHallRows" text="Σειρές" prefWidth="80.0" />
                                     <TableColumn fx:id="colHallCols" text="Στήλες" prefWidth="80.0" />
+                                 </columns>
+                              </TableView>
+                           </children>
+                        </HBox>
+                     </children>
+                     <padding>
+                        <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                     </padding>
+                  </VBox>
+               </content>
+            </Tab>
+
+            <Tab text="Πρόγραμμα Προβολών">
+               <content>
+                  <VBox fx:id="screening" spacing="15.0">
+                     <children>
+                        <HBox prefHeight="400.0" prefWidth="740.0" spacing="15.0">
+                           <children>
+                              <VBox prefWidth="250.0" spacing="10.0" alignment="TOP_LEFT">
+                                 <children>
+                                    <Label text="Ταινία" />
+                                    <ComboBox fx:id="movieComboBox" prefWidth="230.0" />
+                                    <Label text="Αίθουσα" />
+                                    <ComboBox fx:id="hallComboBox" prefWidth="230.0" />
+                                    <Label text="Ημερομηνία" />
+                                    <DatePicker fx:id="screeningDatePicker" prefWidth="230.0" />
+                                    <Label text="Ώρα (π.χ. 19:30)" />
+                                    <TextField fx:id="screeningTimeField" promptText="HH:mm" />
+                                    <Label text="Τιμή Εισιτηρίου (€)" />
+                                    <TextField fx:id="screeningPriceField" />
+                                    <HBox spacing="10.0">
+                                       <children>
+                                          <Button mnemonicParsing="false" onAction="#handleAddScreening" text="Προσθήκη" />
+                                          <Button mnemonicParsing="false" onAction="#handleUpdateScreening" text="Ενημέρωση" />
+                                          <Button mnemonicParsing="false" onAction="#handleDeleteScreening" text="Διαγραφή" />
+                                       </children>
+                                       <VBox.margin>
+                                          <Insets top="10.0" />
+                                       </VBox.margin>
+                                    </HBox>
+                                 </children>
+                              </VBox>
+                              <TableView fx:id="screeningTable" onMouseClicked="#handleScreeningTableClick" prefWidth="450.0" HBox.hgrow="ALWAYS">
+                                 <columns>
+                                    <TableColumn fx:id="colScreeningId" text="ID" prefWidth="40.0" />
+                                    <TableColumn fx:id="colScreeningMovie" text="Ταινία" prefWidth="140.0" />
+                                    <TableColumn fx:id="colScreeningHall" text="Αίθουσα" prefWidth="110.0" />
+                                    <TableColumn fx:id="colScreeningTime" text="Ώρα Έναρξης" prefWidth="120.0" />
+                                    <TableColumn fx:id="colScreeningPrice" text="Τιμή" prefWidth="60.0" />
                                  </columns>
                               </TableView>
                            </children>
