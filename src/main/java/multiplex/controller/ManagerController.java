@@ -162,7 +162,7 @@ public class ManagerController {
             return;
         }
 
-        String sql = "UPDATE Movies SET Title = ?, Description = ?, Duration_mins = ?, Genre = ? WHERE Movie_ID = ?";
+        String sql = "UPDATE Movies SET Title = ?, Description = ?, Duration_mins = ?, Genre = ?, Poster_path = ? WHERE Movie_ID = ?";
         try (Connection conn = DBconnection.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, titleField.getText().trim());
             pstmt.setString(2, descriptionField.getText().trim());
