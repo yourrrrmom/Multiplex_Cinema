@@ -28,6 +28,7 @@ public class ManagerController {
     @FXML private TextArea descriptionField;
     @FXML private TextField durationField;
     @FXML private TextField genreField;
+    @FXML private TextField posterPathField;
 
     @FXML private TableView<Movie> movieTable;
     @FXML private TableColumn<Movie, Integer> colMovieId;
@@ -119,6 +120,7 @@ public class ManagerController {
             descriptionField.setText(selectedMovie.getDescription());
             durationField.setText(String.valueOf(selectedMovie.getDuration()));
             genreField.setText(selectedMovie.getGenre());
+            posterPathField.setText(selectedMovie.getPosterPath());
         }
     }
 
@@ -136,10 +138,12 @@ public class ManagerController {
 
         try {
             int duration = Integer.parseInt(durationStr);
+            String poster = posterPathField.getText().trim();
+            
             String sql = "INSERT INTO Movies (Title, Description, Duration_mins, Genre, Poster_path) VALUES (?, ?, ?, ?, ?)";
             try (Connection conn = DBconnection.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
                 pstmt.setString(1, title); pstmt.setString(2, description);
-                pstmt.setInt(3, duration); pstmt.setString(4, genre); pstmt.setString(5, "");
+                pstmt.setInt(3, duration); pstmt.setString(4, genre); pstmt.setString(5, poster);
                 pstmt.executeUpdate();
                 showAlert(Alert.AlertType.INFORMATION, "Επιτυχία", "Η ταινία προστέθηκε!");
                 clearMovieFields();
@@ -164,7 +168,8 @@ public class ManagerController {
             pstmt.setString(2, descriptionField.getText().trim());
             pstmt.setInt(3, Integer.parseInt(durationField.getText().trim()));
             pstmt.setString(4, genreField.getText().trim());
-            pstmt.setInt(5, selectedMovie.getMovieId());
+            pstmt.setString(5, posterPathField.getText().trim());
+            pstmt.setInt(6, selectedMovie.getMovieId());
 
             pstmt.executeUpdate();
             showAlert(Alert.AlertType.INFORMATION, "Επιτυχία", "Η ταινία ενημερώθηκε!");
@@ -183,20 +188,27 @@ public class ManagerController {
             return;
         }
 
-        String sql = "DELETE FROM Movies WHERE Movie_ID = ?";
-        try (Connection conn = DBconnection.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setInt(1, selectedMovie.getMovieId());
-            pstmt.executeUpdate();
-            showAlert(Alert.AlertType.INFORMATION, "Επιτυχία", "Η ταινία διαγράφηκε!");
-            clearMovieFields();
-            loadMoviesFromDatabase();
-        } catch (SQLException e) {
-            showAlert(Alert.AlertType.ERROR, "Σφάλμα", "Αποτυχία διαγραφής: " + e.getMessage());
+        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
+        confirm.setTitle("Επιβεβαίωση Διαγραφής");
+        confirm.setHeaderText("ΠΡΟΣΟΧΗ: Διαγραφή Ταινίας!");
+        confirm.setContentText("Είστε σίγουροι; Αν διαγραφεί η ταινία, θα διαγραφούν αυτόματα ΟΛΕΣ οι προβολές και τα εισιτήρια της!");
+
+        if (confirm.showAndWait().get() == javafx.scene.control.ButtonType.OK) {
+            String sql = "DELETE FROM Movies WHERE Movie_ID = ?";
+            try (Connection conn = DBconnection.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                pstmt.setInt(1, selectedMovie.getMovieId());
+                pstmt.executeUpdate();
+                showAlert(Alert.AlertType.INFORMATION, "Επιτυχία", "Η ταινία διαγράφηκε!");
+                clearMovieFields();
+                loadMoviesFromDatabase();
+            } catch (SQLException e) {
+                showAlert(Alert.AlertType.ERROR, "Σφάλμα", "Αποτυχία διαγραφής: " + e.getMessage());
+            }
         }
     }
 
     private void clearMovieFields() {
-        titleField.clear(); descriptionField.clear(); durationField.clear(); genreField.clear();
+        titleField.clear(); descriptionField.clear(); durationField.clear(); genreField.clear(); posterPathField.clear();
     }
 
     // =========================================================================
@@ -272,21 +284,32 @@ public class ManagerController {
             return;
         }
 
-        String sql = "DELETE FROM Halls WHERE Hall_ID = ?";
-        try (Connection conn = DBconnection.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setInt(1, selectedHall.getHallId());
-            pstmt.executeUpdate();
-            showAlert(Alert.AlertType.INFORMATION, "Επιτυχία", "Η αίθουσα διαγράφηκε!");
-            clearHallFields();
-            loadHallsFromDatabase();
-        } catch (SQLException e) {
-            showAlert(Alert.AlertType.ERROR, "Σφάλμα", "Αποτυχία διαγραφής: " + e.getMessage());
+        // --- ΠΡΟΣΘΗΚΗ ΤΟΥ ALERT ΕΠΙΒΕΒΑΙΩΣΗΣ ---
+        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
+        confirm.setTitle("Επιβεβαίωση Διαγραφής");
+        confirm.setHeaderText("ΠΡΟΣΟΧΗ: Διαγραφή Αίθουσας!");
+        confirm.setContentText("Είστε σίγουροι; Αν διαγραφεί η αίθουσα, θα διαγραφούν αυτόματα ΟΛΕΣ οι προβολές και τα εισιτήρια που συνδέονται με αυτήν!");
+
+        // Αν ο χρήστης πατήσει το ΟΚ, τότε μόνο προχωράμε στη διαγραφή
+        if (confirm.showAndWait().get() == javafx.scene.control.ButtonType.OK) {
+            String sql = "DELETE FROM Halls WHERE Hall_ID = ?";
+            try (Connection conn = DBconnection.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                
+                pstmt.setInt(1, selectedHall.getHallId());
+                pstmt.executeUpdate();
+                showAlert(Alert.AlertType.INFORMATION, "Επιτυχία", "Η αίθουσα διαγράφηκε!");
+                clearHallFields();
+                loadHallsFromDatabase();
+            
+            } catch (SQLException e) {
+                showAlert(Alert.AlertType.ERROR, "Σφάλμα", "Αποτυχία διαγραφής: " + e.getMessage());
+            }
         }
     }
 
-    private void clearHallFields() {
-        hallNameField.clear(); rowsField.clear(); colsField.clear();
-    }
+private void clearHallFields() {
+    hallNameField.clear(); rowsField.clear(); colsField.clear();
+}
 
     private void showAlert(Alert.AlertType type, String title, String content) {
         Alert alert = new Alert(type);

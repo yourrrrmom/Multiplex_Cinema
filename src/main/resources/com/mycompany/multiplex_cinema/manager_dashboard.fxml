@@ -40,6 +40,8 @@
                                     <TextField fx:id="durationField" />
                                     <Label text="Κατηγορία (Genre)" />
                                     <TextField fx:id="genreField" />
+                                    <Label text="Διαδρομή Αφίσας (Poster)" />
+                                    <TextField fx:id="posterPathField" />
                                     <HBox spacing="10.0">
                                        <children>
                                           <Button mnemonicParsing="false" onAction="#handleAddMovie" text="Προσθήκη" />
