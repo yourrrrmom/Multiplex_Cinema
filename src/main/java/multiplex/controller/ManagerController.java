@@ -459,16 +459,29 @@ public class ManagerController {
             showAlert(Alert.AlertType.WARNING, "Προσοχή", "Επιλέξτε πρώτα μια προβολή από τον πίνακα!");
             return;
         }
-
-        String sql = "DELETE FROM Screenings WHERE Screening_ID = ?";
-        try (Connection conn = DBconnection.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setInt(1, selected.getScreeningId());
-            pstmt.executeUpdate();
-            showAlert(Alert.AlertType.INFORMATION, "Επιτυχία", "Η προβολή διαγράφηκε!");
-            clearScreeningFields();
-            loadScreeningsFromDatabase();
-        } catch (SQLException e) {
+        
+        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
+        confirm.setTitle("Επιβεβαίωση Διαγραφής");
+        confirm.setHeaderText("ΠΡΟΣΟΧΗ: Διαγραφή Προβολής!");
+        confirm.setContentText("Είστε σίγουροι; Αν διαγραφεί η προβολή, θα διαγραφούν και τα εισιτήρια όσων την έχουν κλείσει!");
+        
+        confirm.getDialogPane().setMinWidth(700);
+        confirm.getDialogPane().setPrefWidth(700);
+        
+        if (confirm.showAndWait().get() == javafx.scene.control.ButtonType.OK) {
+            String sql = "DELETE FROM Screenings WHERE Screening_ID = ?";
+            try (Connection conn = DBconnection.getConnection(); 
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+             
+                pstmt.setInt(1, selected.getScreeningId());
+                pstmt.executeUpdate();
+                showAlert(Alert.AlertType.INFORMATION, "Επιτυχία", "Η προβολή διαγράφηκε!");
+                clearScreeningFields();
+                loadScreeningsFromDatabase();
+            
+            } catch (SQLException e) {
             showAlert(Alert.AlertType.ERROR, "Σφάλμα", "Αποτυχία διαγραφής: " + e.getMessage());
+            }
         }
     }
 
