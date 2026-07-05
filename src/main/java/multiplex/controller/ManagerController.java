@@ -456,7 +456,7 @@ public class ManagerController {
     private void handleDeleteScreening() {
         Screening selected = screeningTable.getSelectionModel().getSelectedItem();
         if (selected == null) {
-            showAlert(Alert.AlertType.WARNING, "Προσοχή", "Επιλέξτε πρώτα μια προβολή από τον πίνακα!");
+            showAlert(Alert.AlertType.WARNING, "Προσοχή","Επιλέξτε πρώτα μια προβολή από τον πίνακα!");
             return;
         }
         
