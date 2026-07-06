@@ -541,6 +541,10 @@ private void clearHallFields() {
         }
         try {
             price = Double.parseDouble(priceStr);
+            if (price <= 0) {
+                showAlert(Alert.AlertType.ERROR, "Σφάλμα", "Η τιμή πρέπει να είναι μεγαλύτερη από 0.");
+                return null;
+            }
         } catch (NumberFormatException e) {
             showAlert(Alert.AlertType.ERROR, "Σφάλμα", "Η τιμή πρέπει να είναι αριθμός (π.χ. 8.50)");
             return null;
