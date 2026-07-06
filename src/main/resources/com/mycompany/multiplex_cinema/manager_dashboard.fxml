@@ -12,16 +12,29 @@
 <?import javafx.scene.control.TextArea?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
 <VBox alignment="CENTER" prefHeight="600.0" prefWidth="800.0" spacing="20.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="multiplex.controller.ManagerController">
    <children>
-      <Label text="Πίνακας Ελέγχου Διαχειριστή">
-         <font>
-            <Font name="System Bold" size="24.0" />
-         </font>
-      </Label>
+      
+      <!-- Νέο HBox για τον τίτλο και το κουμπί αποσύνδεσης -->
+      <HBox alignment="CENTER_LEFT" spacing="10.0">
+         <children>
+            <Label text="Πίνακας Ελέγχου Διαχειριστή">
+               <font>
+                  <Font name="System Bold" size="24.0" />
+               </font>
+            </Label>
+            <Region HBox.hgrow="ALWAYS" />
+            <Button mnemonicParsing="false" onAction="#handleLogout" style="-fx-background-color: #dc3545; -fx-text-fill: white;" text="Αποσύνδεση">
+               <font>
+                  <Font name="System Bold" size="12.0" />
+               </font>
+            </Button>
+         </children>
+      </HBox>
 
       <TabPane prefHeight="450.0" prefWidth="760.0" tabClosingPolicy="UNAVAILABLE">
          <tabs>

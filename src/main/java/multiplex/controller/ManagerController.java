@@ -185,6 +185,17 @@ public class ManagerController {
         }
     }
 
+    @FXML
+    private void handleLogout() {
+        try {
+            // Καλούμε τη μέθοδο setRoot από το App.java για να φορτώσει το login.fxml
+            com.mycompany.multiplex_cinema.App.setRoot("login"); 
+        } catch (java.io.IOException e) {
+            System.err.println("Σφάλμα κατά την αποσύνδεση: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+    
     // =========================================================================
     // --- ΜΕΘΟΔΟΙ ΔΙΑΧΕΙΡΙΣΗΣ ΤΑΙΝΙΩΝ ---
     // =========================================================================

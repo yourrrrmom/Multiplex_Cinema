@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<VBox spacing="15.0" prefWidth="600.0" prefHeight="400.0" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="multiplex.controller.ReservationsListController">
+   <padding>
+      <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+   </padding>
+   
+   <Label text="Διαχείριση Κρατήσεων">
+      <font>
+         <Font name="System Bold" size="18.0" />
+      </font>
+   </Label>
+   
+   <TableView fx:id="reservationsTable" VBox.vgrow="ALWAYS">
+     <columns>
+       <TableColumn fx:id="resIdColumn" prefWidth="50.0" text="ID" />
+       <TableColumn fx:id="customerColumn" prefWidth="150.0" text="Όνομα Πελάτη" />
+       <TableColumn fx:id="movieColumn" prefWidth="200.0" text="Ταινία / Ώρα" />
+       <TableColumn fx:id="priceColumn" prefWidth="100.0" text="Σύνολο (€)" />
+     </columns>
+   </TableView>
+   
+   <HBox alignment="CENTER_RIGHT" spacing="15.0">
+      <Button text="Κλείσιμο" onAction="#handleClose" />
+      <Button fx:id="btnDelete" text="Διαγραφή Επιλεγμένης Κράτησης" onAction="#handleDelete" style="-fx-background-color: #dc3545; -fx-text-fill: white;" disable="true"/>
+   </HBox>
+</VBox>

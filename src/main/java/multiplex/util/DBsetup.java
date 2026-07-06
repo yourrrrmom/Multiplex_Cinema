@@ -77,10 +77,10 @@ public class DBsetup {
             "\n" +
             "-- Ταινίες\n" +
             "INSERT OR IGNORE INTO Movies (Movie_ID, Title, Description, Duration_mins, Genre, Poster_path) \n" +
-            "VALUES (1, 'Inception', 'A thief who steals corporate secrets through the use of dream-sharing technology.', 148, 'Sci-Fi', '/images/inception.png');\n" +
+            "VALUES (1, 'Inception', 'A thief who steals corporate secrets through the use of dream-sharing technology.', 148, 'Sci-Fi', '/images/inception.jpg');\n" +
             "\n" +
             "INSERT OR IGNORE INTO Movies (Movie_ID, Title, Description, Duration_mins, Genre, Poster_path) \n" +
-            "VALUES (2, 'The Dark Knight', 'When the menace known as the Joker wreaks havoc on Gotham..', 152, 'Action', '/images/dark_knight.png');\n" +
+            "VALUES (2, 'The Dark Knight', 'When the menace known as the Joker wreaks havoc on Gotham..', 152, 'Action', '/images/dark_knight.jpg');\n" +
             "\n" +
             "-- Αίθουσες\n" +
             "INSERT OR IGNORE INTO Halls (Hall_ID, Name, Total_Rows, Total_Cols) VALUES (1, 'Αίθουσα 1 IMAX', 5, 6);\n" +

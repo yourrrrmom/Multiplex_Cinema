@@ -1,5 +1,7 @@
 package multiplex.controller;
 
+import com.mycompany.multiplex_cinema.App;
+import java.io.IOException;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
@@ -16,6 +18,7 @@ import multiplex.util.DBconnection;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import javafx.scene.image.ImageView;
 
 public class CashierController {
     // Αυτά τα fx:id συνδέονται αυτόματα με τα αντίστοιχα στοιχεία του FXML
@@ -26,6 +29,8 @@ public class CashierController {
     @FXML private TableColumn<ScreeningDisplay, String> roomColumn;
     @FXML private TableColumn<ScreeningDisplay, Integer> seatsColumn;
     @FXML private Button btnProceed;
+    @FXML private ImageView posterImageView;
+    @FXML private Label selectedMovieLabel;
     // Η βασική λίστα που περιέχει ΟΛΕΣ τις προβολές
     private final ObservableList<ScreeningDisplay> screeningList = FXCollections.observableArrayList();
 
@@ -47,9 +52,31 @@ public class CashierController {
         setupLiveSearch();
         
         // 5. Listener για την επιλογή γραμμής στον πίνακα
-        tableView.getSelectionModel().selectedItemProperty().addListener((obs, old, newSel) -> 
-            btnProceed.setDisable(newSel == null || newSel.getAvailableSeats() <= 0)
-        );
+        tableView.getSelectionModel().selectedItemProperty().addListener((obs, oldSel, newSel) -> {
+            if (newSel != null) {
+                btnProceed.setDisable(newSel.getAvailableSeats() <= 0);
+                selectedMovieLabel.setText(newSel.getTitle());
+        
+                try {
+                    // Παίρνει το path από τη βάση (π.χ. "/images/inception.png")
+                    String path = newSel.getPosterPath(); 
+                    if (path != null && !path.isEmpty()) {
+                        // Φορτώνει την εικόνα από τον φάκελο resources/images/
+                        javafx.scene.image.Image image = new javafx.scene.image.Image(getClass().getResourceAsStream(path));
+                        posterImageView.setImage(image);
+                    } else {
+                        posterImageView.setImage(null);
+                    }
+                } catch (Exception e) {
+                    System.out.println("Δεν βρέθηκε η εικόνα: " + newSel.getPosterPath());
+                    posterImageView.setImage(null);
+                }
+            } else {
+                btnProceed.setDisable(true);
+                selectedMovieLabel.setText("Δεν έχει επιλεγεί προβολή");
+                posterImageView.setImage(null);
+            }
+        });
         
         // Refresh data when the window gains focus
         tableView.sceneProperty().addListener((obs, oldScene, newScene) -> {
@@ -97,20 +124,21 @@ public class CashierController {
 
     public void loadScreeningsFromDatabase() {
         screeningList.clear();
+        // 1. Προσθέσαμε στο SELECT το Ticket_Price και το Poster_path
         String sql = "SELECT s.Screening_ID, m.Title, s.Start_Time, h.Name AS Room_Name, " +
-             "((h.Total_Rows * h.Total_Cols) - COUNT(rs.Screening_ID)) AS Available_Seats, " +
-             "s.Ticket_Price " +
-             "FROM Screenings s " +
-             "JOIN Movies m ON s.Movie_ID = m.Movie_ID " +
-             "JOIN Halls h ON s.Hall_ID = h.Hall_ID " +
-             "LEFT JOIN Reserved_Seats rs ON s.Screening_ID = rs.Screening_ID " +
-             "GROUP BY s.Screening_ID";
+                 "((h.Total_Rows * h.Total_Cols) - COUNT(rs.Screening_ID)) AS Available_Seats, " +
+                 "s.Ticket_Price, m.Poster_path " +
+                 "FROM Screenings s " +
+                 "JOIN Movies m ON s.Movie_ID = m.Movie_ID " +
+                 "JOIN Halls h ON s.Hall_ID = h.Hall_ID " +
+                 "LEFT JOIN Reserved_Seats rs ON s.Screening_ID = rs.Screening_ID " +
+                 "GROUP BY s.Screening_ID";
 
-        try (Connection conn = DBconnection.getConnection();
-            Statement stmt = conn.createStatement();
-            ResultSet rs = stmt.executeQuery(sql)) {
-            //for refresh
-            List<ScreeningDisplay> newList = new ArrayList<>();
+        try (java.sql.Connection conn = multiplex.util.DBconnection.getConnection();
+            java.sql.Statement stmt = conn.createStatement();
+            java.sql.ResultSet rs = stmt.executeQuery(sql)) {
+
+            java.util.List<ScreeningDisplay> newList = new java.util.ArrayList<>();
             while (rs.next()) {
                 newList.add(new ScreeningDisplay(
                     rs.getInt("Screening_ID"),
@@ -118,12 +146,14 @@ public class CashierController {
                     rs.getString("Start_Time"),
                     rs.getString("Room_Name"),
                     rs.getInt("Available_Seats"),
-                    rs.getDouble("Ticket_Price")
+                    rs.getDouble("Ticket_Price"),
+                    rs.getString("Poster_path")
                 ));
             }
-            screeningList.setAll(newList); // This refreshes the UI binding correctly
-        } catch (SQLException e) {
-            showAlert(Alert.AlertType.ERROR, "Σφάλμα", "Αποτυχία: " + e.getMessage());
+        
+            screeningList.setAll(newList); 
+        } catch (java.sql.SQLException e) {
+            showAlert(javafx.scene.control.Alert.AlertType.ERROR, "Σφάλμα", "Αποτυχία: " + e.getMessage());
         }
     }
 
@@ -190,16 +220,26 @@ public class CashierController {
     
     @FXML
     private void handleLogout() {
-        // Logic to close the current window
-        Stage currentStage = (Stage) searchField.getScene().getWindow();
-        currentStage.close();
-
-        // Logic to reopen login screen
         try {
-            Parent loginRoot = FXMLLoader.load(getClass().getResource("/com/mycompany/multiplex_cinema/login.fxml"));
-            Stage loginStage = new Stage();
-            loginStage.setScene(new Scene(loginRoot));
-            loginStage.show();
-        } catch (Exception e) { e.printStackTrace(); }
+            // Καλούμε τη μέθοδο setRoot από το App.java για να φορτώσει το login.fxml
+            com.mycompany.multiplex_cinema.App.setRoot("login"); 
+        } catch (java.io.IOException e) {
+            System.err.println("Σφάλμα κατά την αποσύνδεση: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+    
+    @FXML
+    private void handleManageReservations() {
+        try {
+            javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(getClass().getResource("/com/mycompany/multiplex_cinema/reservations_list.fxml"));
+            javafx.scene.Parent root = loader.load();
+            javafx.stage.Stage stage = new javafx.stage.Stage();
+            stage.setTitle("Διαχείριση Κρατήσεων");
+            stage.setScene(new javafx.scene.Scene(root));
+            stage.show();
+        } catch (java.io.IOException e) {
+            e.printStackTrace();
+        }
     }
 }

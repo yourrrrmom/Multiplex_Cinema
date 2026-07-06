@@ -32,7 +32,7 @@ public class App extends Application {
         }
 
         // 3. Φόρτωση της αρχικής οθόνης (ψάχνει το αρχείο primary.fxml στον φάκελο resources)
-        scene = new Scene(loadFXML("primary"), 800, 600);
+        scene = new Scene(loadFXML("login"), 800, 600);
         
         stage.setTitle("Multiplex Cinema Management System");  // ο τίτλος του παραθύρου
         stage.setScene(scene);

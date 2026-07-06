@@ -14,6 +14,7 @@ import javafx.stage.Stage;
 import multiplex.util.DBconnection;
 import java.util.ArrayList;
 import java.util.List;
+import javafx.scene.control.Alert;
 import model.ScreeningDisplay;
 
 public class SeatingController {
@@ -87,22 +88,35 @@ public class SeatingController {
     
     @FXML
     private void handleConfirm() {
+        
+        // Έλεγχος αν η λίστα είναι άδεια
+        if (selectedSeats.isEmpty()) {
+            javafx.scene.control.Alert alert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.WARNING);
+            alert.setTitle("Προσοχή");
+            alert.setHeaderText(null);
+            alert.setContentText("Παρακαλώ επιλέξτε τουλάχιστον μία θέση για να προχωρήσετε.");
+            alert.showAndWait();
+            return; // σταματάει την εκτέλεση, δεν ανοίγει το επόμενο παράθυρο
+        }
+        
         try {
             String fxmlFile = "/com/mycompany/multiplex_cinema/reservation_complete.fxml";
-            FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlFile));
-
-            Parent root = loader.load();
+            javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(getClass().getResource(fxmlFile));
+            javafx.scene.Parent root = loader.load();
 
             ReservationController controller = loader.getController();
             controller.setDashboardController(this.dashboardController);
             controller.setDashboardStage(this.dashboardStage);
-            double total = selectedSeats.size() * currentScreening.getPrice(); 
-            controller.initReservation(currentScreening, selectedSeats, total);
+
+            // Παίρνουμε το πλήθος των θέσεων και το πολλαπλασιάζουμε με την τιμή της προβολής
+            double total = selectedSeats.size() * currentScreening.getTicketPrice();
+        
+            // Στέλνουμε τα δεδομένα (και το νέο total) στον ReservationController
             controller.initReservation(currentScreening, selectedSeats, total);
 
-            Stage stage = new Stage();
+            javafx.stage.Stage stage = new javafx.stage.Stage();
             stage.setTitle("Ολοκλήρωση Κράτησης");
-            stage.setScene(new Scene(root));
+            stage.setScene(new javafx.scene.Scene(root));
             stage.show();
         } catch (Exception e) {
             e.printStackTrace();

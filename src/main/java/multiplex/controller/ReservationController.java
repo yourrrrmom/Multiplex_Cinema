@@ -93,7 +93,7 @@ public class ReservationController {
         successStage.show();
 
         // Disappear after 10 seconds
-        PauseTransition delay = new PauseTransition(Duration.seconds(6));
+        PauseTransition delay = new PauseTransition(Duration.seconds(3));
         delay.setOnFinished(e -> {
             if (this.dashboardController != null) {
                 this.dashboardController.loadScreeningsFromDatabase();

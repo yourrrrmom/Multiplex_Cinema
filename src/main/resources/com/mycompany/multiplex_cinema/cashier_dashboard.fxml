@@ -6,52 +6,58 @@
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.VBox?>
 <?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<VBox spacing="15.0" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="multiplex.controller.CashierController">
-    
-    <padding>
-        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
-    </padding>
+<VBox spacing="15.0" prefWidth="900.0" prefHeight="600.0" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="multiplex.controller.CashierController">
+   <padding>
+      <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+   </padding>
 
-    <HBox alignment="CENTER_RIGHT">
-        <Button text="Αποσύνδεση" onAction="#handleLogout" style="-fx-background-color: #dc3545; -fx-text-fill: white;"/>
-    </HBox>
+   <!-- Πάνω μέρος: Τίτλος, Πεδίο Αναζήτησης και Αποσύνδεση -->
+   <HBox alignment="CENTER_LEFT" spacing="10.0">
+      <Label text="Αναζήτηση Προβολών:">
+         <font>
+            <Font name="System Bold" size="14.0" />
+         </font>
+      </Label>
+      <TextField fx:id="searchField" prefWidth="300.0" promptText="Πληκτρολόγησε τίτλο ταινίας..." />
+      <Region HBox.hgrow="ALWAYS" />
+      <Button text="Αποσύνδεση" onAction="#handleLogout" style="-fx-background-color: #dc3545; -fx-text-fill: white;"/>
+   </HBox>
 
-    <HBox alignment="CENTER_LEFT" spacing="10.0">
-        <Label text="Αναζήτηση Προβολών:">
-            <font>
-                <Font name="System Bold" size="18.0" />
-            </font>
-        </Label>
-        <TextField fx:id="searchField" prefWidth="300.0" promptText="Πληκτρολόγησε τίτλο ταινίας..." />
-    </HBox>
+   <!-- Μεσαίο μέρος: Πίνακας με Προβολές (Αριστερά) + Αφίσα (Δεξιά) -->
+   <HBox spacing="15.0" VBox.vgrow="ALWAYS">
+       <TableView fx:id="tableView" HBox.hgrow="ALWAYS">
+         <columns>
+           <TableColumn fx:id="titleColumn" prefWidth="200.0" text="Τίτλος Ταινίας" />
+           <TableColumn fx:id="timeColumn" prefWidth="120.0" text="Ώρα" />
+           <TableColumn fx:id="roomColumn" prefWidth="120.0" text="Αίθουσα" />
+           <TableColumn fx:id="seatsColumn" prefWidth="130.0" text="Διαθέσιμες Θέσεις" />
+         </columns>
+       </TableView>
+       
+       <!-- Περιοχή για την Αφίσα -->
+       <VBox alignment="TOP_CENTER" spacing="10.0" prefWidth="220.0" style="-fx-border-color: #cccccc; -fx-border-radius: 5; -fx-padding: 10; -fx-background-color: #f8f9fa;">
+           <Label text="Επιλεγμένη Ταινία" style="-fx-font-weight: bold; -fx-text-fill: #6c757d;"/>
+           <!-- Το fx:id για να συνδεθεί με τον Controller -->
+           <ImageView fx:id="posterImageView" fitHeight="280.0" fitWidth="190.0" pickOnBounds="true" preserveRatio="true" />
+           <Label fx:id="selectedMovieLabel" text="Δεν έχει επιλεγεί προβολή" wrapText="true" textAlignment="CENTER" style="-fx-font-size: 14px; -fx-font-weight: bold;"/>
+       </VBox>
+   </HBox>
 
-    <TableView fx:id="tableView" VBox.vgrow="ALWAYS">
-        <columns>
-            <TableColumn fx:id="titleColumn" prefWidth="250.0" text="Τίτλος Ταινίας" />
-            <TableColumn fx:id="timeColumn" prefWidth="100.0" text="Ώρα" />
-            <TableColumn fx:id="roomColumn" prefWidth="120.0" text="Αίθουσα" />
-            <TableColumn fx:id="seatsColumn" prefWidth="130.0" text="Διαθέσιμες Θέσεις" />
-        </columns>
-    </TableView>
-
-    <HBox alignment="CENTER_LEFT" spacing="15.0">
-        <Button text="Διαγραφή Κράτησης" onAction="#handleDeleteReservation" style="-fx-background-color: #ffc107;"/>
-
-        <Region HBox.hgrow="ALWAYS" />
-
-        <Button fx:id="btnProceed" mnemonicParsing="false" onAction="#handleProceed" style="-fx-background-color: #28a745; -fx-text-fill: white;" text="Επιλογή &amp; Πλάνο Θέσεων">
-            <font>
-                <Font name="System Bold" size="14.0" />
-            </font>
-            <padding>
-                <Insets bottom="10.0" left="20.0" right="20.0" top="10.0" />
-            </padding>
-        </Button>
-    </HBox>
-
+   <!-- Κάτω μέρος : Κουμπιά -->
+   <HBox alignment="CENTER_LEFT" spacing="15.0">
+      <!-- Αυτό το κουμπί θα ανοίγει πλέον τη λίστα -->
+      <Button text="Διαχείριση Κρατήσεων" onAction="#handleManageReservations" style="-fx-background-color: #ffc107;" />
+      <Region HBox.hgrow="ALWAYS" />
+      <Button fx:id="btnProceed" disable="true" text="Επιλογή Πλάνου Θέσεων" onAction="#handleProceed" style="-fx-background-color: #28a745; -fx-text-fill: white;">
+         <font>
+            <Font name="System Bold" size="14.0" />
+         </font>
+      </Button>
+   </HBox>
 </VBox>
