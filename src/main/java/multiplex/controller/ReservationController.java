@@ -35,7 +35,7 @@ public class ReservationController {
     }
 
     @FXML
-    private void handleFinalizePayment() {
+    void handleFinalizePayment() {
         Connection conn = null;
         try {
             conn = DBconnection.getConnection();

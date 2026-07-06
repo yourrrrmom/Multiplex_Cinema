@@ -556,7 +556,7 @@ private void clearHallFields() {
      * Κάθε προβολή "κρατάει" την αίθουσα για τη διάρκεια της ταινίας + 15 λεπτά καθαρισμό.
      * excludeScreeningId = -1 σε προσθήκη, ή το ID της προβολής σε ενημέρωση (ώστε να μη συγκρίνεται με τον εαυτό της).
      */
-    private boolean hasConflict(Screening candidate, int excludeScreeningId) {
+    boolean hasConflict(Screening candidate, int excludeScreeningId) {
         int bufferMinutes = 15;
         int movieDuration = getMovieDuration(candidate.getMovieId());
         LocalDateTime candidateStart = LocalDateTime.parse(candidate.getStartTime(), DB_FORMAT);
@@ -586,7 +586,7 @@ private void clearHallFields() {
         return false;
     }
 
-    private int getMovieDuration(int movieId) {
+    int getMovieDuration(int movieId) {
         for (Movie m : movieList) {
             if (m.getMovieId() == movieId) return m.getDuration();
         }
