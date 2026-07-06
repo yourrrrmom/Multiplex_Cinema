@@ -1,4 +1,4 @@
-package model;
+package multiplex.controller;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -14,7 +14,7 @@ import javafx.stage.Stage;
 import multiplex.util.DBconnection;
 import java.util.ArrayList;
 import java.util.List;
-import multiplex.controller.CashierController;
+import model.ScreeningDisplay;
 
 public class SeatingController {
     private CashierController dashboardController;
@@ -96,7 +96,8 @@ public class SeatingController {
             ReservationController controller = loader.getController();
             controller.setDashboardController(this.dashboardController);
             controller.setDashboardStage(this.dashboardStage);
-            double total = selectedSeats.size() * 8.50; 
+            double total = selectedSeats.size() * currentScreening.getPrice(); 
+            controller.initReservation(currentScreening, selectedSeats, total);
             controller.initReservation(currentScreening, selectedSeats, total);
 
             Stage stage = new Stage();

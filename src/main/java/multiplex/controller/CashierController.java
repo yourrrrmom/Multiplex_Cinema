@@ -12,7 +12,6 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Stage;
 import model.ScreeningDisplay;
-import model.SeatingController;
 import multiplex.util.DBconnection;
 import java.sql.*;
 import java.util.ArrayList;
@@ -99,7 +98,8 @@ public class CashierController {
     public void loadScreeningsFromDatabase() {
         screeningList.clear();
         String sql = "SELECT s.Screening_ID, m.Title, s.Start_Time, h.Name AS Room_Name, " +
-             "((h.Total_Rows * h.Total_Cols) - COUNT(rs.Screening_ID)) AS Available_Seats " +
+             "((h.Total_Rows * h.Total_Cols) - COUNT(rs.Screening_ID)) AS Available_Seats, " +
+             "s.Ticket_Price " +
              "FROM Screenings s " +
              "JOIN Movies m ON s.Movie_ID = m.Movie_ID " +
              "JOIN Halls h ON s.Hall_ID = h.Hall_ID " +
@@ -117,7 +117,8 @@ public class CashierController {
                     rs.getString("Title"),
                     rs.getString("Start_Time"),
                     rs.getString("Room_Name"),
-                    rs.getInt("Available_Seats")
+                    rs.getInt("Available_Seats"),
+                    rs.getDouble("Ticket_Price")
                 ));
             }
             screeningList.setAll(newList); // This refreshes the UI binding correctly

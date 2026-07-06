@@ -6,13 +6,15 @@ public class ScreeningDisplay {
     private String time;
     private String room;
     private int availableSeats;
+    private double price;
 
-    public ScreeningDisplay(int id, String title, String time, String room, int availableSeats) {
+    public ScreeningDisplay(int id, String title, String time, String room, int availableSeats, double price) {
         this.screeningId = id;
         this.title = title;
         this.time = time;
         this.room = room;
         this.availableSeats = availableSeats;
+        this.price = price;
     }
 
     public int getScreeningId() {return screeningId;}
@@ -20,5 +22,6 @@ public class ScreeningDisplay {
     public String getTime() { return time; }
     public String getRoom() { return room; }
     public int getAvailableSeats() { return availableSeats; }
+    public double getPrice() { return this.price;}
 }
 

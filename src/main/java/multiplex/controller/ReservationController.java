@@ -1,4 +1,4 @@
-package model;
+package multiplex.controller;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
@@ -11,7 +11,7 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import javafx.stage.StageStyle;
-import multiplex.controller.CashierController;
+import model.ScreeningDisplay;
 
 public class ReservationController {
     private CashierController dashboardController;
@@ -36,7 +36,9 @@ public class ReservationController {
 
     @FXML
     private void handleFinalizePayment() {
-        try (Connection conn = DBconnection.getConnection()) {
+        Connection conn = null;
+        try {
+            conn = DBconnection.getConnection();
             conn.setAutoCommit(false); // Start Transaction
 
             // 1. Insert into Reservations
@@ -64,7 +66,14 @@ public class ReservationController {
             conn.commit(); //conclude Transaction
             showSuccessMessage(resId);
             System.out.println("Κράτηση ολοκληρώθηκε!");
-        } catch (Exception e) { e.printStackTrace(); }
+        } catch (Exception e) {
+            if(conn != null){
+                try { conn.rollback();} catch (SQLException ex) { ex.printStackTrace(); }
+            }
+            e.printStackTrace(); 
+        } finally {
+            if (conn != null) try { conn.close(); } catch (SQLException e) { e.printStackTrace(); }
+        }
     }
     
     public void setDashboardController(CashierController c) { this.dashboardController = c; }
