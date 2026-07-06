@@ -51,7 +51,7 @@ public class LoginController {
                         App.setRoot("manager_dashboard");  // φορτώνει το αρχείο manager_dashboard.fxml
                     
                     } else if ("cashier".equals(role)) {
-                        App.setRoot("SearchScreen");  // φορτώνει το αρχείο cashier_dashboard.fxml
+                        App.setRoot("cashier_dashboard");  // φορτώνει το αρχείο cashier_dashboard.fxml
                     
                     } else {
                         messageLabel.setText("Άγνωστος ρόλος χρήστη.");
