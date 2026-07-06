@@ -8,6 +8,10 @@ public class Screening {
     private String startTime;
     private double ticketPrice;
 
+    // Βοηθητικά πεδία ΜΟΝΟ για εμφάνιση στο TableView (δεν αποθηκεύονται ξανά στη ΒΔ)
+    private String movieTitle;
+    private String hallName;
+
     public Screening(int screeningId, int movieId, int hallId, String startTime, double ticketPrice) {
         this.screeningId = screeningId;
         this.movieId = movieId;
@@ -27,5 +31,9 @@ public class Screening {
     public void setHallId(int hallId) { this.hallId = hallId; }
     public void setStartTime(String startTime) { this.startTime = startTime; }
     public void setTicketPrice(double ticketPrice) { this.ticketPrice = ticketPrice; }
-    
+
+    public String getMovieTitle() { return movieTitle; }
+    public void setMovieTitle(String movieTitle) { this.movieTitle = movieTitle; }
+    public String getHallName() { return hallName; }
+    public void setHallName(String hallName) { this.hallName = hallName; }
 }

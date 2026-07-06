@@ -4,6 +4,8 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.DatePicker;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TableView;
@@ -16,9 +18,15 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 
 import multiplex.model.Movie;
 import multiplex.model.Hall;
+import multiplex.model.Screening;
 import multiplex.util.DBconnection;
 
 public class ManagerController {
@@ -47,12 +55,32 @@ public class ManagerController {
     @FXML private TableColumn<Hall, Integer> colHallRows;
     @FXML private TableColumn<Hall, Integer> colHallCols;
 
+    // --- ΠΕΔΙΑ ΠΡΟΒΟΛΩΝ (FXML) ---
+    @FXML private ComboBox<Movie> movieComboBox;
+    @FXML private ComboBox<Hall> hallComboBox;
+    @FXML private DatePicker screeningDatePicker;
+    @FXML private TextField screeningTimeField;
+    @FXML private TextField screeningPriceField;
+
+    @FXML private TableView<Screening> screeningTable;
+    @FXML private TableColumn<Screening, Integer> colScreeningId;
+    @FXML private TableColumn<Screening, String> colScreeningMovie;
+    @FXML private TableColumn<Screening, String> colScreeningHall;
+    @FXML private TableColumn<Screening, String> colScreeningTime;
+    @FXML private TableColumn<Screening, Double> colScreeningPrice;
+
     // --- CONTAINER VBOX ---
     @FXML private VBox movie;
     @FXML private VBox hall;
+    @FXML private VBox screening;
 
     private ObservableList<Movie> movieList = FXCollections.observableArrayList();
     private ObservableList<Hall> hallList = FXCollections.observableArrayList();
+    private ObservableList<Screening> screeningList = FXCollections.observableArrayList();
+
+    // Η ΒΔ αποθηκεύει το Start_Time σαν "yyyy-MM-dd HH:mm:ss" (π.χ. 2026-06-15 19:30:00)
+    private static final DateTimeFormatter DB_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    private static final DateTimeFormatter DISPLAY_FORMAT = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 
     @FXML
     public void initialize() {
@@ -71,6 +99,28 @@ public class ManagerController {
         colHallCols.setCellValueFactory(new PropertyValueFactory<>("totalCols"));
         hallTable.setItems(hallList);
         loadHallsFromDatabase();
+
+        // --- SCREENINGS ---
+        colScreeningId.setCellValueFactory(new PropertyValueFactory<>("screeningId"));
+        colScreeningMovie.setCellValueFactory(new PropertyValueFactory<>("movieTitle"));
+        colScreeningHall.setCellValueFactory(new PropertyValueFactory<>("hallName"));
+        colScreeningTime.setCellValueFactory(new PropertyValueFactory<>("startTime"));
+        colScreeningPrice.setCellValueFactory(new PropertyValueFactory<>("ticketPrice"));
+        screeningTable.setItems(screeningList);
+
+        // Τα ComboBox δείχνουν τον τίτλο/όνομα, όχι το toString() του αντικειμένου
+        movieComboBox.setItems(movieList);
+        movieComboBox.setConverter(new javafx.util.StringConverter<Movie>() {
+            @Override public String toString(Movie m) { return m == null ? "" : m.getTitle(); }
+            @Override public Movie fromString(String s) { return null; }
+        });
+        hallComboBox.setItems(hallList);
+        hallComboBox.setConverter(new javafx.util.StringConverter<Hall>() {
+            @Override public String toString(Hall h) { return h == null ? "" : h.getName(); }
+            @Override public Hall fromString(String s) { return null; }
+        });
+
+        loadScreeningsFromDatabase();
     }
 
     private void loadMoviesFromDatabase() {
@@ -105,6 +155,33 @@ public class ManagerController {
             }
         } catch (SQLException e) {
             showAlert(Alert.AlertType.ERROR, "Σφάλμα", "Αποτυχία φόρτωσης αιθουσών: " + e.getMessage());
+        }
+    }
+
+    private void loadScreeningsFromDatabase() {
+        screeningList.clear();
+        // JOIN με Movies/Halls ώστε να πάρουμε τον τίτλο και το όνομα της αίθουσας για εμφάνιση
+        String sql = "SELECT s.Screening_ID, s.Movie_ID, s.Hall_ID, s.Start_Time, s.Ticket_Price, " +
+                     "       m.Title AS Movie_Title, h.Name AS Hall_Name " +
+                     "FROM Screenings s " +
+                     "JOIN Movies m ON s.Movie_ID = m.Movie_ID " +
+                     "JOIN Halls h ON s.Hall_ID = h.Hall_ID " +
+                     "ORDER BY s.Start_Time";
+        try (Connection conn = DBconnection.getConnection();
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+            while (rs.next()) {
+                Screening sc = new Screening(
+                        rs.getInt("Screening_ID"), rs.getInt("Movie_ID"),
+                        rs.getInt("Hall_ID"), rs.getString("Start_Time"),
+                        rs.getDouble("Ticket_Price")
+                );
+                sc.setMovieTitle(rs.getString("Movie_Title"));
+                sc.setHallName(rs.getString("Hall_Name"));
+                screeningList.add(sc);
+            }
+        } catch (SQLException e) {
+            showAlert(Alert.AlertType.ERROR, "Σφάλμα", "Αποτυχία φόρτωσης προβολών: " + e.getMessage());
         }
     }
 
@@ -310,6 +387,208 @@ public class ManagerController {
 private void clearHallFields() {
     hallNameField.clear(); rowsField.clear(); colsField.clear();
 }
+
+    // =========================================================================
+    // --- ΜΕΘΟΔΟΙ ΔΙΑΧΕΙΡΙΣΗΣ ΠΡΟΒΟΛΩΝ (SCREENINGS) ---
+    // =========================================================================
+
+    @FXML
+    private void handleScreeningTableClick() {
+        Screening selected = screeningTable.getSelectionModel().getSelectedItem();
+        if (selected == null) return;
+
+        for (Movie m : movieList) {
+            if (m.getMovieId() == selected.getMovieId()) { movieComboBox.setValue(m); break; }
+        }
+        for (Hall h : hallList) {
+            if (h.getHallId() == selected.getHallId()) { hallComboBox.setValue(h); break; }
+        }
+
+        try {
+            LocalDateTime dt = LocalDateTime.parse(selected.getStartTime(), DB_FORMAT);
+            screeningDatePicker.setValue(dt.toLocalDate());
+            screeningTimeField.setText(dt.toLocalTime().toString().substring(0, 5));
+        } catch (DateTimeParseException e) {
+            screeningDatePicker.setValue(null);
+            screeningTimeField.setText("");
+        }
+
+        screeningPriceField.setText(String.valueOf(selected.getTicketPrice()));
+    }
+
+    @FXML
+    private void handleAddScreening() {
+        Screening candidate = buildScreeningFromForm();
+        if (candidate == null) return;
+
+        if (hasConflict(candidate, -1)) {
+            showAlert(Alert.AlertType.WARNING, "Σύγκρουση Ωραρίου",
+                    "Η αίθουσα είναι ήδη κλεισμένη για άλλη προβολή σε αυτό το χρονικό διάστημα!");
+            return;
+        }
+
+        String sql = "INSERT INTO Screenings (Movie_ID, Hall_ID, Start_Time, Ticket_Price) VALUES (?, ?, ?, ?)";
+        try (Connection conn = DBconnection.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, candidate.getMovieId());
+            pstmt.setInt(2, candidate.getHallId());
+            pstmt.setString(3, candidate.getStartTime());
+            pstmt.setDouble(4, candidate.getTicketPrice());
+            pstmt.executeUpdate();
+            showAlert(Alert.AlertType.INFORMATION, "Επιτυχία", "Η προβολή προστέθηκε!");
+            clearScreeningFields();
+            loadScreeningsFromDatabase();
+        } catch (SQLException e) {
+            showAlert(Alert.AlertType.ERROR, "Σφάλμα", "Αποτυχία προσθήκης: " + e.getMessage());
+        }
+    }
+
+    @FXML
+    private void handleUpdateScreening() {
+        Screening selected = screeningTable.getSelectionModel().getSelectedItem();
+        if (selected == null) {
+            showAlert(Alert.AlertType.WARNING, "Προσοχή", "Επιλέξτε πρώτα μια προβολή από τον πίνακα!");
+            return;
+        }
+
+        Screening candidate = buildScreeningFromForm();
+        if (candidate == null) return;
+
+        if (hasConflict(candidate, selected.getScreeningId())) {
+            showAlert(Alert.AlertType.WARNING, "Σύγκρουση Ωραρίου",
+                    "Η αίθουσα είναι ήδη κλεισμένη για άλλη προβολή σε αυτό το χρονικό διάστημα!");
+            return;
+        }
+
+        String sql = "UPDATE Screenings SET Movie_ID = ?, Hall_ID = ?, Start_Time = ?, Ticket_Price = ? WHERE Screening_ID = ?";
+        try (Connection conn = DBconnection.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, candidate.getMovieId());
+            pstmt.setInt(2, candidate.getHallId());
+            pstmt.setString(3, candidate.getStartTime());
+            pstmt.setDouble(4, candidate.getTicketPrice());
+            pstmt.setInt(5, selected.getScreeningId());
+            pstmt.executeUpdate();
+            showAlert(Alert.AlertType.INFORMATION, "Επιτυχία", "Η προβολή ενημερώθηκε!");
+            clearScreeningFields();
+            loadScreeningsFromDatabase();
+        } catch (SQLException e) {
+            showAlert(Alert.AlertType.ERROR, "Σφάλμα", "Αποτυχία ενημέρωσης: " + e.getMessage());
+        }
+    }
+
+    @FXML
+    private void handleDeleteScreening() {
+        Screening selected = screeningTable.getSelectionModel().getSelectedItem();
+        if (selected == null) {
+            showAlert(Alert.AlertType.WARNING, "Προσοχή","Επιλέξτε πρώτα μια προβολή από τον πίνακα!");
+            return;
+        }
+        
+        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
+        confirm.setTitle("Επιβεβαίωση Διαγραφής");
+        confirm.setHeaderText("ΠΡΟΣΟΧΗ: Διαγραφή Προβολής!");
+        confirm.setContentText("Είστε σίγουροι; Αν διαγραφεί η προβολή, θα διαγραφούν και τα εισιτήρια όσων την έχουν κλείσει!");
+        
+        confirm.getDialogPane().setMinWidth(700);
+        confirm.getDialogPane().setPrefWidth(700);
+        
+        if (confirm.showAndWait().get() == javafx.scene.control.ButtonType.OK) {
+            String sql = "DELETE FROM Screenings WHERE Screening_ID = ?";
+            try (Connection conn = DBconnection.getConnection(); 
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+             
+                pstmt.setInt(1, selected.getScreeningId());
+                pstmt.executeUpdate();
+                showAlert(Alert.AlertType.INFORMATION, "Επιτυχία", "Η προβολή διαγράφηκε!");
+                clearScreeningFields();
+                loadScreeningsFromDatabase();
+            
+            } catch (SQLException e) {
+            showAlert(Alert.AlertType.ERROR, "Σφάλμα", "Αποτυχία διαγραφής: " + e.getMessage());
+            }
+        }
+    }
+
+    private Screening buildScreeningFromForm() {
+        Movie selectedMovie = movieComboBox.getValue();
+        Hall selectedHall = hallComboBox.getValue();
+        LocalDate date = screeningDatePicker.getValue();
+        String timeStr = screeningTimeField.getText().trim();
+        String priceStr = screeningPriceField.getText().trim();
+
+        if (selectedMovie == null || selectedHall == null || date == null || timeStr.isEmpty() || priceStr.isEmpty()) {
+            showAlert(Alert.AlertType.ERROR, "Σφάλμα", "Συμπληρώστε Ταινία, Αίθουσα, Ημερομηνία, Ώρα και Τιμή!");
+            return null;
+        }
+
+        LocalTime time;
+        double price;
+        try {
+            time = LocalTime.parse(timeStr);
+        } catch (DateTimeParseException e) {
+            showAlert(Alert.AlertType.ERROR, "Σφάλμα", "Η ώρα πρέπει να είναι σε μορφή HH:mm (π.χ. 19:30)");
+            return null;
+        }
+        try {
+            price = Double.parseDouble(priceStr);
+        } catch (NumberFormatException e) {
+            showAlert(Alert.AlertType.ERROR, "Σφάλμα", "Η τιμή πρέπει να είναι αριθμός (π.χ. 8.50)");
+            return null;
+        }
+
+        LocalDateTime startDateTime = LocalDateTime.of(date, time);
+        return new Screening(-1, selectedMovie.getMovieId(), selectedHall.getHallId(),
+                startDateTime.format(DB_FORMAT), price);
+    }
+
+    /**
+     * Ελέγχει αν η υποψήφια προβολή συγκρούεται με άλλη προβολή στην ΙΔΙΑ αίθουσα.
+     * Κάθε προβολή "κρατάει" την αίθουσα για τη διάρκεια της ταινίας + 15 λεπτά καθαρισμό.
+     * excludeScreeningId = -1 σε προσθήκη, ή το ID της προβολής σε ενημέρωση (ώστε να μη συγκρίνεται με τον εαυτό της).
+     */
+    private boolean hasConflict(Screening candidate, int excludeScreeningId) {
+        int bufferMinutes = 15;
+        int movieDuration = getMovieDuration(candidate.getMovieId());
+        LocalDateTime candidateStart = LocalDateTime.parse(candidate.getStartTime(), DB_FORMAT);
+        LocalDateTime candidateEnd = candidateStart.plusMinutes(movieDuration + bufferMinutes);
+
+        String sql = "SELECT s.Screening_ID, s.Start_Time, m.Duration_mins " +
+                     "FROM Screenings s JOIN Movies m ON s.Movie_ID = m.Movie_ID " +
+                     "WHERE s.Hall_ID = ?";
+        try (Connection conn = DBconnection.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, candidate.getHallId());
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    int otherId = rs.getInt("Screening_ID");
+                    if (otherId == excludeScreeningId) continue;
+
+                    LocalDateTime otherStart = LocalDateTime.parse(rs.getString("Start_Time"), DB_FORMAT);
+                    LocalDateTime otherEnd = otherStart.plusMinutes(rs.getInt("Duration_mins") + bufferMinutes);
+
+                    boolean overlap = candidateStart.isBefore(otherEnd) && otherStart.isBefore(candidateEnd);
+                    if (overlap) return true;
+                }
+            }
+        } catch (SQLException e) {
+            showAlert(Alert.AlertType.ERROR, "Σφάλμα", "Αποτυχία ελέγχου διαθεσιμότητας: " + e.getMessage());
+            return true;
+        }
+        return false;
+    }
+
+    private int getMovieDuration(int movieId) {
+        for (Movie m : movieList) {
+            if (m.getMovieId() == movieId) return m.getDuration();
+        }
+        return 0;
+    }
+
+    private void clearScreeningFields() {
+        movieComboBox.setValue(null);
+        hallComboBox.setValue(null);
+        screeningDatePicker.setValue(null);
+        screeningTimeField.clear();
+        screeningPriceField.clear();
+    }
 
     private void showAlert(Alert.AlertType type, String title, String content) {
         Alert alert = new Alert(type);
