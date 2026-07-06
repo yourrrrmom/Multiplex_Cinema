@@ -20,7 +20,10 @@ public class App extends Application {
 
     @Override
     public void start(Stage stage) throws IOException {
-        // 1. Δοκιμή σύνδεσης με τη βάση SQLite πριν φορτώσει το γραφικό περιβάλλον
+        // 1. Αρχικοποίηση βάσης
+        multiplex.util.DBsetup.setup();
+
+        // 2. Δοκιμή σύνδεσης με τη βάση SQLite πριν φορτώσει το γραφικό περιβάλλον
         Connection conn = DBconnection.getConnection();
         if (conn != null) {
             System.out.println("Επιτυχής εκκίνηση! Η βάση δεδομένων είναι έτοιμη..");
@@ -28,7 +31,7 @@ public class App extends Application {
             System.out.println("Πρόβλημα με τη βάση δεδομένων..");
         }
 
-        // 2. Φόρτωση της αρχικής οθόνης (ψάχνει το αρχείο primary.fxml στον φάκελο resources)
+        // 3. Φόρτωση της αρχικής οθόνης (ψάχνει το αρχείο primary.fxml στον φάκελο resources)
         scene = new Scene(loadFXML("primary"), 800, 600);
         
         stage.setTitle("Multiplex Cinema Management System");  // ο τίτλος του παραθύρου

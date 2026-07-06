@@ -5,7 +5,7 @@ import java.sql.Statement;
 import java.sql.SQLException;
 
 public class DBsetup {
-    public static void main(String[] args) {
+    public static void setup() {
         // ο κώδικας SQL για τους πίνακες και τα δεδομένα (συμβατό με Java 11)
         String createTablesAndInsertData = 
             "-- Πίνακας Χρηστών (Ταμίες & Διαχειριστές)\n" +
@@ -106,7 +106,14 @@ public class DBsetup {
         try (Connection conn = DBconnection.getConnection();
              Statement stmt = conn.createStatement()) {
             
-            stmt.executeUpdate(createTablesAndInsertData); 
+            // Διαχωρίζουμε τις εντολές SQL με το ";" και τις εκτελούμε μία-μία
+            String[] commands = createTablesAndInsertData.split(";");
+            
+            for (String command : commands) {
+                if (!command.trim().isEmpty()) {
+                    stmt.execute(command);
+                }
+            } 
             System.out.println("Επιτυχία! Η βάση δεδομένων είναι 100% έτοιμη και συγχρονισμένη με το SRS!");
 
         } catch (SQLException e) {
@@ -114,3 +121,4 @@ public class DBsetup {
         }
     }
 }
+
