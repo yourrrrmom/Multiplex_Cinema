@@ -19,6 +19,7 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 import javafx.scene.image.ImageView;
+import javafx.stage.Modality;
 
 public class CashierController {
     // Αυτά τα fx:id συνδέονται αυτόματα με τα αντίστοιχα στοιχεία του FXML
@@ -232,14 +233,20 @@ public class CashierController {
     @FXML
     private void handleManageReservations() {
         try {
-            javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(getClass().getResource("/com/mycompany/multiplex_cinema/reservations_list.fxml"));
-            javafx.scene.Parent root = loader.load();
-            javafx.stage.Stage stage = new javafx.stage.Stage();
+            // Φόρτωση του FXML για τις κρατήσεις
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/mycompany/multiplex_cinema/reservations_list.fxml"));
+            Parent root = loader.load();
+
+            // Δημιουργία νέου Stage (παραθύρου)
+            Stage stage = new Stage();
             stage.setTitle("Διαχείριση Κρατήσεων");
-            stage.setScene(new javafx.scene.Scene(root));
+            stage.setScene(new Scene(root));
+            stage.initModality(Modality.APPLICATION_MODAL); // Κάνει το παράθυρο "Modal" (δεν μπορείς να πατήσεις το πίσω μέχρι να το κλείσεις)
             stage.show();
-        } catch (java.io.IOException e) {
+
+        } catch (IOException e) {
             e.printStackTrace();
+            // Εμφάνιση μηνύματος λάθους αν το αρχείο δεν φορτώνει
         }
     }
 }
