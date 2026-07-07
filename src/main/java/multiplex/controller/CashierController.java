@@ -1,6 +1,5 @@
 package multiplex.controller;
 
-import com.mycompany.multiplex_cinema.App;
 import java.io.IOException;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -14,10 +13,6 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Stage;
 import model.ScreeningDisplay;
-import multiplex.util.DBconnection;
-import java.sql.*;
-import java.util.ArrayList;
-import java.util.List;
 import javafx.scene.image.ImageView;
 import javafx.stage.Modality;
 
@@ -112,7 +107,6 @@ public class CashierController {
                 if (screening.getTitle().toLowerCase().contains(lowerCaseFilter)) {
                     return true;
                 }
-                
                 return false; // Δεν ταιριάζει
             });
         });
@@ -182,34 +176,6 @@ public class CashierController {
             e.printStackTrace();
         }
     }
-    
-    @FXML
-    private void handleDeleteReservation() {
-        TextInputDialog dialog = new TextInputDialog();
-        dialog.setTitle("Διαγραφή Κράτησης");
-        dialog.setHeaderText("Εισάγετε το Reservation_ID:");
-
-        dialog.showAndWait().ifPresent(id -> {
-            try (Connection conn = DBconnection.getConnection()) {
-                // Delete seats first (Foreign Key constraint)
-                PreparedStatement ps1 = conn.prepareStatement("DELETE FROM Reserved_Seats WHERE Reservation_ID = ?");
-                ps1.setString(1, id);
-                ps1.executeUpdate();
-
-                // Delete reservation
-                PreparedStatement ps2 = conn.prepareStatement("DELETE FROM Reservations WHERE Reservation_ID = ?");
-                ps2.setString(1, id);
-                int rows = ps2.executeUpdate();
-
-                if (rows > 0) {
-                    loadScreeningsFromDatabase(); // Refresh table
-                    showAlert(Alert.AlertType.INFORMATION, "Επιτυχία", "Η κράτηση διαγράφηκε.");
-                } else {
-                    showAlert(Alert.AlertType.ERROR, "Σφάλμα", "Δεν βρέθηκε κράτηση με αυτό το ID.");
-                }
-            } catch (SQLException e) { e.printStackTrace(); }
-        });
-    }
 
     private void showAlert(Alert.AlertType type, String title, String content) {
         Alert alert = new Alert(type);
@@ -237,6 +203,8 @@ public class CashierController {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/mycompany/multiplex_cinema/reservations_list.fxml"));
             Parent root = loader.load();
 
+            ReservationListController controller = loader.getController();
+            controller.setParentController(this);
             // Δημιουργία νέου Stage (παραθύρου)
             Stage stage = new Stage();
             stage.setTitle("Διαχείριση Κρατήσεων");

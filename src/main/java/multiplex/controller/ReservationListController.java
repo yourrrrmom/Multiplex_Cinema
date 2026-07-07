@@ -11,7 +11,8 @@ import model.ReservationDisplay;
 import multiplex.util.DBconnection;
 
 public class ReservationListController {
-
+    private CashierController parentController;
+    
     @FXML private TableView<ReservationDisplay> reservationsTable;
     @FXML private TableColumn<ReservationDisplay, Integer> resIdColumn;
     @FXML private TableColumn<ReservationDisplay, String> customerColumn;
@@ -68,19 +69,30 @@ public class ReservationListController {
         }
     }
 
+    public void setParentController(CashierController controller) { this.parentController = controller;}
+    
     @FXML
     public void handleDelete() {
         ReservationDisplay selected = reservationsTable.getSelectionModel().getSelectedItem();
         if (selected == null) return;
 
         try (Connection conn = DBconnection.getConnection()) {
-            String sql = "DELETE FROM Reservations WHERE Reservation_ID = ?";
-            PreparedStatement pstmt = conn.prepareStatement(sql);
-            pstmt.setInt(1, selected.getReservationId());
-            pstmt.executeUpdate();
-            
-            // Ανανέωση πίνακα
+            // 1. Σβήσε πρώτα τις θέσεις που αντιστοιχούν σε αυτή την κράτηση
+            PreparedStatement ps1 = conn.prepareStatement("DELETE FROM Reserved_Seats WHERE Reservation_ID = ?");
+            ps1.setInt(1, selected.getReservationId());
+            ps1.executeUpdate();
+
+            // 2. Σβήσε την κράτηση
+            PreparedStatement ps2 = conn.prepareStatement("DELETE FROM Reservations WHERE Reservation_ID = ?");
+            ps2.setInt(1, selected.getReservationId());
+            ps2.executeUpdate();
+
             loadReservations();
+
+            // 3. Ενημέρωσε τον Cashier για να ξαναμετρήσει τις θέσεις
+            if (parentController != null) {
+                parentController.loadScreeningsFromDatabase();
+            }
         } catch (SQLException e) {
             e.printStackTrace();
         }
